@@ -7,6 +7,8 @@ from scipy.spatial.distance import squareform, cdist, pdist
 '''
 Python Tool for Training RBF Surrogate Models
 
+https://github.com/evanchodora/rbf_surrogate
+
 Evan Chodora (2019)
 echodor@clemson.edu
 
@@ -119,11 +121,15 @@ class RBF:
             self.y_data = np.loadtxt(y_file, skiprows=1, delimiter=",")  # Read output data file
             self.y_data = self.y_data.reshape(self.y_data.shape[0], -1)  # Reshape into 2D matrix (avoids array issues)
 
+            # Compute epsilon based on the standard deviation of the output values
+            self.epsilon = np.std(self.y_data)
+
             self._train()  # Run the model training function
 
             # Store model parameters in a Python shelve database
             db = shelve.open(self.model_db)
             db['rbf_func'] = self.rbf_func
+            db['epsilon'] = self.epsilon
             db['x_train'] = self.x_data
             db['weights'] = self.weights
             db.close()
@@ -132,8 +138,10 @@ class RBF:
             # Read previously stored model data from the database
             model_data = shelve.open(model_db)
             self.rbf_func = model_data['rbf_func']
+            self.epsilon = model_data['epsilon']
             self.x_train = model_data['x_train']
             self.weights = model_data['weights']
+
             model_data.close()
 
             self._predict()  # Run the model prediction functions
@@ -152,7 +160,7 @@ class RBF:
 if __name__ == "__main__":
 
     # Parse the command line input options to "opt" variable when using on the command line
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--type', dest='type', choices=['train', 'predict'], required=True,
                         help="""Specify whether the tool is to be used for training with \"train\" or
                         making predictions with a stored model with \"predict\".""")
