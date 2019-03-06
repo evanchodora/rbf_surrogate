@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import shelve
 
 
 '''
@@ -10,21 +11,94 @@ Python Tool for Training RBF Surrogate Models
 '''
 
 
-class RBF(object):
+# Class to create or use and RBF surrogate model
+class RBF:
 
-    def __init__(self, *args, **kwargs):
+    # Collection of possible Radial Basis Functions to use in the surrogate model:
+    # Multiquadratic
+    def _multiquadric(self, r):
+        return np.sqrt((1.0/self.epsilon*r)**2 + 1)
 
-        self.x = args[0]  # First argument is 2D array of input values (n * N)
-        self.dim = self.x.shape[-1]  # Calculate number of ***
-        self.y = args[1]
+    # Inverse Multiquadratic
+    def _inverse_multiquadric(self, r):
+        return 1.0/np.sqrt((1.0/self.epsilon*r)**2 + 1)
 
+    # Standard Gaussian
+    def _gaussian(self, r):
+        return np.exp(-(1.0/self.epsilon*r)**2)
+
+    # Linear
+    def _linear(self, r):
+        return r
+
+    # Cubic
+    def _cubic(self, r):
+        return r**3
+
+    # Thin Plate
+    def _thin_plate(self, r):
+        return xlogy(r**2, r)
+
+    # Function to compute the Euclidean distance (r)
+    def _compute_r(self, a, b=None):
+        if b is not None:
+            return np.sqrt((a.T - b) ** 2)
+        else:
+            return np.sqrt((a.T - a) ** 2)
+
+    def _compute_N(self):
+
+        # Dictionary object to store possible RBFs and associated functions to evaluate them
+        # Can add as needed when a new function is added to the collection above
+        rbf_dict = {
+            "multiquadratic" : self._multiquadric,
+            "inverse multiquadric" : self._inverse_multiquadric,
+            "gaussian" : self._gaussian,
+            "linear" : self._linear,
+            "cubic" : self._cubic,
+            "thin plate" : self._thin_plate
+        }
+
+        r = self._compute_r(self.x_data)  # Compute the euclidean distance matrix
+
+        return rbf_dict[self.rbf_func](r)
+
+    # Initialization for the RBF class
+    def __init__(self, type, x_file, y_file, model_db, rbf_func):
+
+        self.x_data = np.atleast_2d(np.loadtxt(x_file, skiprows=1, delimiter=","))  # Read the input locations file
+
+        # Check for training or prediction
+        if type == 'train':
+            self.y_data = np.atleast_2d(np.loadtxt(y_file, skiprows=1, delimiter=","))  # Read output data file
+            self.rbf_func = rbf_func
+            self.model_db = model_db
+
+            N = self._compute_N()
+            self.weights = np.linalg.solve(N, self.y_data)
+            print(self.weights)
+
+        else:
+            self.model = shelve.open(model_db)  # Otherwise, read stored model data
+
+
+# Code to run when called from the command line (usual behavior)
 if __name__ == "__main__":
 
-    # Parse the command line input options
+    # Parse the command line input options to "opt"
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('-t', '--type', choices=['train', 'predict'], required=True, help="Specify whether the tool is to be used for training with \"train\" or making predictions with a stored model with \"predict\".")
-    parser.add_argument('-x', required=True, help="Input file of x locations")
-    parser.add_argument('-y', help="Output file for surrogate training")
-    parser.add_argument('-m', '--model', default='model.db', help="File to save the model output or use a previously trained model file. Default is \"model.db\".")
-    parser.add_argument('-b', '--rbf', default='gaussian', help="Specified RBF. Default is a Gaussian.")
+    parser.add_argument('-t', '--type', dest='type', choices=['train', 'predict'], required=True,
+                        help="""Specify whether the tool is to be used for training with \"train\" or
+                        making predictions with a stored model with \"predict\".""")
+    parser.add_argument('-x', dest='x_file', default='x_train.dat',
+                        help="""Input file of x locations. Default is \"x_train.dat\".""")
+    parser.add_argument('-y', dest='y_file', default='y_train.dat',
+                        help="""Output file for surrogate training. Default is \"y_train.dat\".""")
+    parser.add_argument('-m', '--model', dest='model', default='model.db',
+                        help="""File to save the model output or use a previously trained model file.
+                        Default is \"model.db\".""")
+    parser.add_argument('-b', '--rbf', dest='rbf', default='gaussian',
+                        help="Specified RBF. Default is a Gaussian.")
     opts = parser.parse_args()
+
+    surrogate = RBF(opts.type, opts.x_file, opts.y_file, opts.model, opts.rbf)
