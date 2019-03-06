@@ -43,11 +43,9 @@ class RBF:
     # Function to compute the Euclidean distance (r)
     def _compute_r(self, a, b=None):
         if b is not None:
-            #return np.sqrt((a.T - b) ** 2)
             # Return the euclidean distance matrix between two matrices (or vectors)
             return cdist(a, b, 'euclidean')
         else:
-            #return np.sqrt((a.T - a) ** 2)
             # Return a square matrix form of the the pairwise euclidean distance for the training locations
             return squareform(pdist(a, 'euclidean'))
 
@@ -70,7 +68,8 @@ class RBF:
     def _train(self):
         r = self._compute_r(self.x_data)  # Compute the euclidean distance matrix
         N = self._compute_N(r)  # Compute the basis function matrix of the specified type
-        self.weights = np.linalg.solve(N, self.y_data.T)  # Solve for the weights vector
+
+        self.weights = np.linalg.solve(N, self.y_data)  # Solve for the weights vector
 
     def _predict(self):
         r = self._compute_r(self.x_train, self.x_data)
@@ -80,14 +79,15 @@ class RBF:
     # Initialization for the RBF class
     def __init__(self, type, x_file, y_file, model_db, rbf_func):
 
-        self.x_data = np.atleast_2d(np.loadtxt(x_file, skiprows=1, delimiter=","))  # Read the input locations file
+        self.x_data = np.loadtxt(x_file, skiprows=1, delimiter=",")  # Read the input locations file
+        self.x_data = self.x_data.reshape(self.x_data.shape[0], -1)
         self.rbf_func = rbf_func
         self.model_db = model_db
 
         # Check for training or prediction
         if type == 'train':
-            self.y_data = np.atleast_2d(np.loadtxt(y_file, skiprows=1, delimiter=","))  # Read output data file
-
+            self.y_data = np.loadtxt(y_file, skiprows=1, delimiter=",")  # Read output data file
+            self.y_data = self.y_data.reshape(self.y_data.shape[0], -1)
             self._train()  # Run the model training function
 
             # Store model parameters in a python shelve database
