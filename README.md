@@ -1,8 +1,6 @@
-### Python Tool for Training RBF Surrogate Models
+## Python Tool for Training RBF Surrogate Models
 
-Evan Chodora (2019)
-
-echodor@clemson.edu
+Evan Chodora - echodor@clemson.edu
 
 `python rbf_surrogate.py -h` for help and options
 
@@ -17,15 +15,15 @@ Included RBFs:
  - Gaussian: "gaussian"
  - Thin Plate: "thin_plate"
 
-Training Example:
+### Training Example:
 
 `python rbf_surrogate.py -t train -r gaussian -x x_data.dat -y y_data.dat -m model.db`
 
-Prediction Example - creates an output file `y_pred.dat` based on the supplied input values:
+### Prediction Example - creates an output file `y_pred.dat` based on the supplied input values:
 
 `python rbf_surrogate.py -t predict -x x_pred.dat -m model.db`
 
-Input and Output File Format:
+### Input and Output File Format:
 
 Files can be supplied in a comma-separated value format for `x` and `y` with a header line.
 
