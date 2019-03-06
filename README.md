@@ -19,12 +19,12 @@ Included RBFs:
 
 `python rbf_surrogate.py -t train -r gaussian -x x_data.dat -y y_data.dat -m model.db`
 
-### Prediction Example - creates an output file `y_pred.dat` based on the supplied input values:
+### Prediction Example
+Creates an output file `y_pred.dat` based on the supplied input values:
 
 `python rbf_surrogate.py -t predict -x x_pred.dat -m model.db`
 
 ### Input and Output File Format:
-
 Files can be supplied in a comma-separated value format for `x` and `y` with a header line.
 
 Example (`x_data.dat`):
