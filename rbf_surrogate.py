@@ -60,26 +60,45 @@ class RBF:
         }
 
         r = self._compute_r(self.x_data)  # Compute the euclidean distance matrix
-
         return rbf_dict[self.rbf_func](r)
+
+    # Function to train an RBF surrogate using the suplied data and options
+    def _train(self):
+        N = self._compute_N()  # Compute the basis function matrix of the specified type
+        self.weights = np.linalg.solve(N, self.y_data)  # Solve for the weights vector
+
+    def _predict(self):
+        N = self._compute_N()
 
     # Initialization for the RBF class
     def __init__(self, type, x_file, y_file, model_db, rbf_func):
 
         self.x_data = np.atleast_2d(np.loadtxt(x_file, skiprows=1, delimiter=","))  # Read the input locations file
+        self.rbf_func = rbf_func
+        self.model_db = model_db
 
         # Check for training or prediction
         if type == 'train':
             self.y_data = np.atleast_2d(np.loadtxt(y_file, skiprows=1, delimiter=","))  # Read output data file
-            self.rbf_func = rbf_func
-            self.model_db = model_db
 
-            N = self._compute_N()
-            self.weights = np.linalg.solve(N, self.y_data)
-            print(self.weights)
+            self._train()  # Run the model training function
+
+            # Store model parameters in a python shelve database
+            db = shelve.open(self.model_db)
+            db['rbf_func'] = self.rbf_func
+            db['x_train'] = self.x_data
+            db['weights'] = self.weights
+            db.close()
 
         else:
-            self.model = shelve.open(model_db)  # Otherwise, read stored model data
+            # Read previously stored model data
+            model_data = shelve.open(model_db)  # Otherwise, read stored model data
+            self.rbf_func = db['rbf_func']
+            self.x_train = db['x_train']
+            self.weights = db['weights']
+            db.close()
+
+            self._predict()
 
 
 # Code to run when called from the command line (usual behavior)
@@ -98,7 +117,7 @@ if __name__ == "__main__":
                         help="""File to save the model output or use a previously trained model file.
                         Default is \"model.db\".""")
     parser.add_argument('-b', '--rbf', dest='rbf', default='gaussian',
-                        help="Specified RBF. Default is a Gaussian.")
+                        help="""Specified RBF to use when training the surrogate. Default is \"gaussian\".""")
     opts = parser.parse_args()
 
     surrogate = RBF(opts.type, opts.x_file, opts.y_file, opts.model, opts.rbf)
