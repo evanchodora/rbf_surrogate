@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 import shelve
-import csv
+from scipy.spatial.distance import squareform, cdist, pdist
 
 
 '''
@@ -43,9 +43,13 @@ class RBF:
     # Function to compute the Euclidean distance (r)
     def _compute_r(self, a, b=None):
         if b is not None:
-            return np.sqrt((a.T - b) ** 2)
+            #return np.sqrt((a.T - b) ** 2)
+            # Return the euclidean distance matrix between two matrices (or vectors)
+            return cdist(a, b, 'euclidean')
         else:
-            return np.sqrt((a.T - a) ** 2)
+            #return np.sqrt((a.T - a) ** 2)
+            # Return a square matrix form of the the pairwise euclidean distance for the training locations
+            return squareform(pdist(a, 'euclidean'))
 
     def _compute_N(self, r):
 
@@ -66,8 +70,7 @@ class RBF:
     def _train(self):
         r = self._compute_r(self.x_data)  # Compute the euclidean distance matrix
         N = self._compute_N(r)  # Compute the basis function matrix of the specified type
-        self.weights = np.linalg.solve(N, self.y_data)  # Solve for the weights vector
-        print(self.weights)
+        self.weights = np.linalg.solve(N, self.y_data.T)  # Solve for the weights vector
 
     def _predict(self):
         r = self._compute_r(self.x_train, self.x_data)
