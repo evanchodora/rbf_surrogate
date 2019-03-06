@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 import shelve
+import csv
 
 
 '''
@@ -46,7 +47,7 @@ class RBF:
         else:
             return np.sqrt((a.T - a) ** 2)
 
-    def _compute_N(self):
+    def _compute_N(self, r):
 
         # Dictionary object to store possible RBFs and associated functions to evaluate them
         # Can add as needed when a new function is added to the collection above
@@ -59,16 +60,19 @@ class RBF:
             "thin plate" : self._thin_plate
         }
 
-        r = self._compute_r(self.x_data)  # Compute the euclidean distance matrix
         return rbf_dict[self.rbf_func](r)
 
     # Function to train an RBF surrogate using the suplied data and options
     def _train(self):
-        N = self._compute_N()  # Compute the basis function matrix of the specified type
+        r = self._compute_r(self.x_data)  # Compute the euclidean distance matrix
+        N = self._compute_N(r)  # Compute the basis function matrix of the specified type
         self.weights = np.linalg.solve(N, self.y_data)  # Solve for the weights vector
+        print(self.weights)
 
     def _predict(self):
-        N = self._compute_N()
+        r = self._compute_r(self.x_train, self.x_data)
+        N = self._compute_N(r)
+        self.y_pred = np.dot(N.T, self.weights)
 
     # Initialization for the RBF class
     def __init__(self, type, x_file, y_file, model_db, rbf_func):
@@ -93,12 +97,21 @@ class RBF:
         else:
             # Read previously stored model data
             model_data = shelve.open(model_db)  # Otherwise, read stored model data
-            self.rbf_func = db['rbf_func']
-            self.x_train = db['x_train']
-            self.weights = db['weights']
-            db.close()
+            self.rbf_func = model_data['rbf_func']
+            self.x_train = model_data['x_train']
+            self.weights = model_data['weights']
+            model_data.close()
 
-            self._predict()
+            self._predict()  # Run the model prediction functions
+
+            # Quick loop to add a header like the input files
+            y_head = []
+            for i in range(self.y_pred.shape[1]):
+                y_head.append('y' + str(i))
+
+            # Convert header list to string and write out the predictions to a file
+            header = ','.join(y_head)
+            np.savetxt('y_pred.dat', self.y_pred, delimiter=',', fmt="%.6f", header=header, comments='')
 
 
 # Code to run when called from the command line (usual behavior)
