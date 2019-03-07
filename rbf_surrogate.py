@@ -49,15 +49,15 @@ class RBF:
     # Collection of possible Radial Basis Functions to use in the surrogate model:
     # Multiquadratic
     def _multiquadric(self, r):
-        return np.sqrt((1.0 / self.epsilon * r) ** 2 + 1)
+        return np.sqrt(r ** 2 + self.epsilon ** 2)
 
     # Inverse Multiquadratic
     def _inverse_multiquadric(self, r):
-        return 1.0 / np.sqrt((1.0 / self.epsilon * r) ** 2 + 1)
+        return 1.0 / np.sqrt(r ** 2 + self.epsilon ** 2)
 
     # Standard Gaussian
     def _gaussian(self, r):
-        return np.exp(-(1.0 / self.epsilon * r) ** 2)
+        return np.exp(-(self.epsilon * r) ** 2)
 
     # Linear
     def _linear(self, r):
@@ -69,9 +69,9 @@ class RBF:
 
     # Thin Plate
     def _thin_plate(self, r):
-        return xlogy(r ** 2, r)
+        return (r ** 2) * np.log10(r)
 
-    # Function to compute the Euclidean distance (r)
+    # Function to compute the Euclidean distance - r = sqrt((x - c) ** 2) = || x - c ||
     def _compute_r(self, a, b=None):
         if b is not None:
             # Return the euclidean distance matrix between two matrices (or vectors)
@@ -127,12 +127,12 @@ class RBF:
             self._train()  # Run the model training function
 
             # Store model parameters in a Python shelve database
-            db = shelve.open(self.model_db)
-            db['rbf_func'] = self.rbf_func
-            db['epsilon'] = self.epsilon
-            db['x_train'] = self.x_data
-            db['weights'] = self.weights
-            db.close()
+            model_data = shelve.open(model_db)
+            model_data['rbf_func'] = self.rbf_func
+            model_data['epsilon'] = self.epsilon
+            model_data['x_train'] = self.x_data
+            model_data['weights'] = self.weights
+            model_data.close()
 
         else:
             # Read previously stored model data from the database
