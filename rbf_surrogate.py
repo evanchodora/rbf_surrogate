@@ -43,21 +43,21 @@ optional arguments:
 '''
 
 
-# Class to create or use and RBF surrogate model
+# Class to create or use an RBF surrogate model
 class RBF:
 
     # Collection of possible Radial Basis Functions to use in the surrogate model:
     # Multiquadratic
     def _multiquadric(self, r):
-        return np.sqrt((1.0/self.epsilon*r)**2 + 1)
+        return np.sqrt((1.0 / self.epsilon * r) ** 2 + 1)
 
     # Inverse Multiquadratic
     def _inverse_multiquadric(self, r):
-        return 1.0/np.sqrt((1.0/self.epsilon*r)**2 + 1)
+        return 1.0 / np.sqrt((1.0 / self.epsilon * r) ** 2 + 1)
 
     # Standard Gaussian
     def _gaussian(self, r):
-        return np.exp(-(1.0/self.epsilon*r)**2)
+        return np.exp(-(1.0 / self.epsilon * r) ** 2)
 
     # Linear
     def _linear(self, r):
@@ -65,11 +65,11 @@ class RBF:
 
     # Cubic
     def _cubic(self, r):
-        return r**3
+        return (r ** 3)
 
     # Thin Plate
     def _thin_plate(self, r):
-        return xlogy(r**2, r)
+        return xlogy(r ** 2, r)
 
     # Function to compute the Euclidean distance (r)
     def _compute_r(self, a, b=None):
@@ -105,7 +105,7 @@ class RBF:
     def _predict(self):
         r = self._compute_r(self.x_train, self.x_data)  # Compute the euclidean distance matrix
         N = self._compute_N(r)  # Compute the basis function matrix of the trained type
-        self.y_pred = np.dot(N.T, self.weights)  # Use the surrogate to predict new y values
+        self.y_pred = np.matmul(N.T, self.weights)  # Use the surrogate to predict new y values
 
     # Initialization for the RBF class
     # Defaults are specified for the options, required to pass in whether you are training or predicting
@@ -121,7 +121,7 @@ class RBF:
             self.y_data = np.loadtxt(y_file, skiprows=1, delimiter=",")  # Read output data file
             self.y_data = self.y_data.reshape(self.y_data.shape[0], -1)  # Reshape into 2D matrix (avoids array issues)
 
-            # Compute epsilon based on the standard deviation of the output values
+            # Compute epsilon based on the standard deviation of the output values for the RBFs that use it
             self.epsilon = np.std(self.y_data)
 
             self._train()  # Run the model training function
@@ -144,7 +144,7 @@ class RBF:
 
             model_data.close()
 
-            self._predict()  # Run the model prediction functions
+            self._predict()  # Run the model prediction function
 
             # Quick loop to add a header that matches the input file format
             y_head = []
