@@ -19,7 +19,7 @@ Included RBFs:
  - Linear: "linear"
  - Cubic: "cubic"
  - Multiquadratic: "multiquadratic"
- - Inverse Multiquadratic: "inverse_multiquadric"
+ - Inverse Multiquadratic: "inverse_multiquadratic"
  - Gaussian: "gaussian"
  - Thin Plate: "thin_plate"
 
@@ -55,6 +55,10 @@ class RBF:
     def _inverse_multiquadric(self, r):
         return 1.0 / np.sqrt(r ** 2 + self.epsilon ** 2)
 
+    # Absolute value
+    def _absolute_value(self, r):
+        return np.abs(r)
+
     # Standard Gaussian
     def _gaussian(self, r):
         return np.exp(-(self.epsilon * r) ** 2)
@@ -69,7 +73,7 @@ class RBF:
 
     # Thin Plate
     def _thin_plate(self, r):
-        return (r ** 2) * np.log10(r)
+        return (r ** 2) * np.log(np.abs(r))
 
     # Function to compute the radial distance - r = (x-c)
     def _compute_r(self, a, b=None):
@@ -86,7 +90,7 @@ class RBF:
         # Can add as needed when a new function is added to the collection above
         rbf_dict = {
             "multiquadratic" : self._multiquadric,
-            "inverse_multiquadric" : self._inverse_multiquadric,
+            "inverse_multiquadratic" : self._inverse_multiquadric,
             "gaussian" : self._gaussian,
             "linear" : self._linear,
             "cubic" : self._cubic,
