@@ -71,14 +71,14 @@ class RBF:
     def _thin_plate(self, r):
         return (r ** 2) * np.log10(r)
 
-    # Function to compute the Euclidean distance - r = sqrt((x - c) ** 2) = || x - c ||
+    # Function to compute the radial distance - r = (x-c)
     def _compute_r(self, a, b=None):
         if b is not None:
-            # Return the euclidean distance matrix between two matrices (or vectors)
-            return cdist(a, b, 'euclidean')
+            # Return the distance matrix between two matrices (or vectors)
+            return cdist(a, b, 'minkowski', p=1)
         else:
-            # Return a square matrix form of the the pairwise euclidean distance for the training locations
-            return squareform(pdist(a, 'euclidean'))
+            # Return a square matrix form of the the pairwise distance distance for the training locations
+            return squareform(pdist(a, 'minkowski', p=1))
 
     def _compute_N(self, r):
 
