@@ -18,6 +18,7 @@ multi-dimensional inputs and multi-dimensional outputs (and scalars for both).
 Included RBFs:
  - Linear: "linear"
  - Cubic: "cubic"
+ - Absolute Value: "absolute"
  - Multiquadratic: "multiquadratic"
  - Inverse Multiquadratic: "inverse_multiquadratic"
  - Gaussian: "gaussian"
@@ -91,6 +92,7 @@ class RBF:
         rbf_dict = {
             "multiquadratic" : self._multiquadric,
             "inverse_multiquadratic" : self._inverse_multiquadric,
+            "absolute": self._absolute_value,
             "gaussian" : self._gaussian,
             "linear" : self._linear,
             "cubic" : self._cubic,

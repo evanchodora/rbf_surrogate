@@ -10,6 +10,7 @@ multi-dimensional inputs and multi-dimensional outputs (and scalars for both).
 Included RBFs:
  - Linear: "linear"
  - Cubic: "cubic"
+ - Absolute Value: "absolute"
  - Multiquadratic: "multiquadratic"
  - Inverse Multiquadratic: "inverse_multiquadric"
  - Gaussian: "gaussian"
