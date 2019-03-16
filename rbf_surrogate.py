@@ -15,6 +15,10 @@ echodor@clemson.edu
 Can be used with a variety of RBFs (see the dictionary of function names below) and can be used with both
 multi-dimensional inputs and multi-dimensional outputs (and scalars for both).
 
+Makes use of the Spatial Distance calculation functions from SciPy to compute the radial distance matrices for the
+radial basis function calculations.
+(https://docs.scipy.org/doc/scipy/reference/spatial.distance.html)
+
 Included RBFs:
  - Linear: "linear"
  - Cubic: "cubic"
@@ -80,10 +84,14 @@ class RBF:
     def _compute_r(self, a, b=None):
         if b is not None:
             # Return the distance matrix between two matrices (or vectors)
-            return cdist(a, b, 'minkowski', p=1)
+            # p=1: r = (x - c)
+            # p=2: r = sqrt((x - c) ** 2) = ||x - c|| (Euclidean Norm)
+            return cdist(a, b, 'minkowski', p=2)
         else:
             # Return a square matrix form of the the pairwise distance distance for the training locations
-            return squareform(pdist(a, 'minkowski', p=1))
+            # p=1: r = (x - c)
+            # p=2: r = sqrt((x - c) ** 2) = ||x - c|| (Euclidean Norm)
+            return squareform(pdist(a, 'minkowski', p=2))
 
     def _compute_N(self, r):
 

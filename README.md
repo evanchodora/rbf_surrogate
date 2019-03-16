@@ -7,6 +7,10 @@ Evan Chodora - echodor@clemson.edu
 Can be used with a variety of RBFs (see the dictionary of function names below) and can be used with both
 multi-dimensional inputs and multi-dimensional outputs (and scalars for both).
 
+Makes use of the Spatial Distance calculation functions from SciPy to compute the radial distance matrices for the
+radial basis function calculations.
+(https://docs.scipy.org/doc/scipy/reference/spatial.distance.html)
+
 Included RBFs:
  - Linear: "linear"
  - Cubic: "cubic"
