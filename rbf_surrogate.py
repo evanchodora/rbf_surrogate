@@ -146,6 +146,11 @@ class RBF:
             model_data['epsilon'] = self.epsilon
             model_data['x_train'] = self.x_data
             model_data['weights'] = self.weights
+            print('\nSurrogate Data:')
+            print('RBF Function: ', model_data['rbf_func'])
+            print('Epsilon: ', model_data['epsilon'])
+            print('Radial Basis Function Weights: ', '\n', model_data['weights'])
+            print('\n', 'Trained surrogate stored in: ', self.model_db)
             model_data.close()
 
         else:
