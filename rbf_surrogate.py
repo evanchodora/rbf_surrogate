@@ -163,6 +163,7 @@ class RBF:
 
             model_data.close()
 
+            print('\nUsing', self.model_db, 'to predict values...')
             self._predict()  # Run the model prediction function
 
             # Quick loop to add a header that matches the input file format
@@ -173,6 +174,7 @@ class RBF:
             # Convert header list of strings to a single string with commas and write out the predictions to a file
             header = ','.join(y_head)
             np.savetxt('y_pred.dat', self.y_pred, delimiter=',', fmt="%.6f", header=header, comments='')
+            print('Predicted values stored in \"y_pred.dat\"')
 
 
 # Code to run when called from the command line (usual behavior)
